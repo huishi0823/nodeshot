@@ -23,7 +23,7 @@ if ( !!config.logging )
 
 winston.info('--- Starting Renderer ---');
 
-var screenshotApi = new ScreenshotApi(config.screenshot);
+var screenshotApi = new ScreenshotApi(config);
 
 jobs.process('screenshot', function(job, done){
   winston.info('Process job "%s"', job.data.title);
@@ -34,9 +34,22 @@ jobs.process('screenshot', function(job, done){
         done ( new Error('Request took longer than ' + config.screenshot.globaltimeout + 'ms') );
       }, config.screenshot.globaltimeout);
 
+    var options = {
+        screenSize: {
+            width: 320
+            , height: 480
+        }
+        , shotSize: {
+            width: 320
+            , height: 'all'
+        }
+        , userAgent: 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.20 (KHTML, like Gecko) Mobile/7B298g'
+        , timeout: 10000
+    };
+
     try{
 
-    screenshotApi.screenshot(job.data.title, job.data.options, job, function(err, stream){
+    screenshotApi.screenshot(job.data.title, options, job, function(err, stream){
       clearTimeout(globalTimeout);
       if ( canceled ) return;
 
@@ -48,8 +61,7 @@ jobs.process('screenshot', function(job, done){
 
         job.log('Cache Request ' + job.data.id);
         job.log('Done');
-
-        stream.pipe(fs.createWriteStream(path.resolve(cacheFolder, job.data.id)));
+        // stream.pipe(fs.createWriteStream(path.resolve(cacheFolder, job.data.id)));
         done();
 
       }

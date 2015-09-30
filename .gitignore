@@ -3,3 +3,15 @@ cache
 logs
 runtime.json
 runtime.log
+.idea
+.settings
+.classpath
+logback
+target
+*.iml
+.project
+.setting
+*.class
+.DS_Store
+*.log
+*:*

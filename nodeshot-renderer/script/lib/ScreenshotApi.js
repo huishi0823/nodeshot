@@ -1,9 +1,12 @@
-var winston       = require('winston');
-var stream        = require("stream");
-var screenshot    = require('electron-screenshot-service');
+var winston = require('winston');
+var stream = require("stream");
+var path = require('path');
+var webshot = require('webshot');
 
 var ScreenshotApi = function (config) {
-  this.config = config;
+    this.config = config;
+    var cwd = process.cwd();
+    this.cacheFolder = path.resolve(cwd, this.config.cache.folder);
 };
 
 /**
@@ -20,34 +23,17 @@ var ScreenshotApi = function (config) {
  *  callback : function ( error, imageBuffer ) { } 
  *
  */
-ScreenshotApi.prototype.screenshot = function ( url, options, job, callback ){
-  var timeCapture = new Date();
+ScreenshotApi.prototype.screenshot = function (url, options, job, callback) {
+    var timeCapture = new Date();
     job.log('Capture');
 
-  if (!options.scrollbar) {
-    options.css += '::-webkit-scrollbar{opacity:0 !important;display: none !important;}';
-  }
-
-  options.url = url;
-
-  screenshot(
-    options
-  ).then(function(image){
-
-    var bufferStream = new stream.Transform();
-        bufferStream.push(image.data);
-        bufferStream.end();
-
-    job.log('Capturing took: %dms',  (new Date() ) - timeCapture );
-    job.progress(100, 100);
-    callback(null, bufferStream);
-  })
-  .catch(function(err){
-    callback(err, null);
-  });
+    webshot(url, path.resolve(this.cacheFolder, job.data.id), options, function (err) {
+        winston.info('err "%s"', JSON.stringify(err));
+        job.log('Capturing took: %dms', (new Date() ) - timeCapture);
+        job.progress(100, 100);
+        callback(null, null);
+    })
 
 };
-
-
 
 module.exports = ScreenshotApi;
