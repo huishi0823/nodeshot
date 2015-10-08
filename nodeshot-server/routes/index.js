@@ -171,6 +171,21 @@ module.exports = function (app, config, pendingJobs, cacheService){
     }
   });
 
+    app.get('/image/remove/:id', function(req, res, next){
+
+        if ( cacheService.hasFile(req.params.id) ){
+
+            cacheService.removeFile(req.params.id);
+
+        }
+
+        res.writeHead(200, {"Content-Type" : "application/json"});
+        res.end(JSON.stringify({
+            request : "success"
+        }));
+
+    });
+
 
 
 };
